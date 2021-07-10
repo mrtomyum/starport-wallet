@@ -1,0 +1,12 @@
+syntax = "proto3";
+package mrtomyum.wallet.dex;
+
+// this line is used by starport scaffolding # genesis/proto/import
+
+option go_package = "gitlab.com/mrtomyum/wallet/x/dex/types";
+
+// GenesisState defines the dex module's genesis state.
+message GenesisState {
+    // this line is used by starport scaffolding # genesis/proto/state
+    string port_id = 1; // this line is used by starport scaffolding # genesis/proto/stateField
+}

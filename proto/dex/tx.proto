@@ -1,0 +1,36 @@
+syntax = "proto3";
+package mrtomyum.wallet.dex;
+
+// this line is used by starport scaffolding # proto/tx/import
+
+option go_package = "gitlab.com/mrtomyum/wallet/x/dex/types";
+
+// Msg defines the Msg service.
+service Msg {
+    // this line is used by starport scaffolding # proto/tx/rpc
+  rpc CancelSellOrder(MsgCancelSellOrder) returns (MsgCancelSellOrderResponse);
+  rpc SendSellOrder(MsgSendSellOrder) returns (MsgSendSellOrderResponse);
+}
+
+// this line is used by starport scaffolding # proto/tx/message
+message MsgCancelSellOrder {
+  string creator = 1;
+  string amountDenom = 2;
+  int32 orderID = 3;
+}
+
+message MsgCancelSellOrderResponse {
+}
+
+message MsgSendSellOrder {
+  string sender = 1;
+  string port = 2;
+  string channelID = 3;
+  uint64 timeoutTimestamp = 4;
+  string amountDenom = 5;
+  int32 amount = 6;
+  int32 price = 7;
+}
+
+message MsgSendSellOrderResponse {
+}

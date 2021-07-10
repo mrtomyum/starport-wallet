@@ -86,6 +86,9 @@ import (
 	walletkeeper "gitlab.com/mrtomyum/wallet/x/wallet/keeper"
 	wallettypes "gitlab.com/mrtomyum/wallet/x/wallet/types"
 	// this line is used by starport scaffolding # stargate/app/moduleImport
+	"gitlab.com/mrtomyum/wallet/x/dex"
+	dexkeeper "gitlab.com/mrtomyum/wallet/x/dex/keeper"
+	dextypes "gitlab.com/mrtomyum/wallet/x/dex/types"
 )
 
 const Name = "wallet"
@@ -133,6 +136,7 @@ var (
 		vesting.AppModuleBasic{},
 		wallet.AppModuleBasic{},
 		// this line is used by starport scaffolding # stargate/app/moduleBasic
+		dex.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -200,6 +204,8 @@ type App struct {
 
 	walletKeeper walletkeeper.Keeper
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
+	ScopedDexKeeper capabilitykeeper.ScopedKeeper
+	dexKeeper       dexkeeper.Keeper
 
 	// the module manager
 	mm *module.Manager
@@ -230,6 +236,7 @@ func New(
 		evidencetypes.StoreKey, ibctransfertypes.StoreKey, capabilitytypes.StoreKey,
 		wallettypes.StoreKey,
 		// this line is used by starport scaffolding # stargate/app/storeKey
+		dextypes.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -324,6 +331,17 @@ func New(
 	)
 
 	// this line is used by starport scaffolding # stargate/app/keeperDefinition
+	scopedDexKeeper := app.CapabilityKeeper.ScopeToModule(dextypes.ModuleName)
+	app.ScopedDexKeeper = scopedDexKeeper
+	app.dexKeeper = *dexkeeper.NewKeeper(
+		appCodec,
+		keys[dextypes.StoreKey],
+		keys[dextypes.MemStoreKey],
+		app.IBCKeeper.ChannelKeeper,
+		&app.IBCKeeper.PortKeeper,
+		scopedDexKeeper,
+	)
+	dexModule := dex.NewAppModule(appCodec, app.dexKeeper)
 
 	app.GovKeeper = govkeeper.NewKeeper(
 		appCodec, keys[govtypes.StoreKey], app.GetSubspace(govtypes.ModuleName), app.AccountKeeper, app.BankKeeper,
@@ -334,6 +352,7 @@ func New(
 	ibcRouter := porttypes.NewRouter()
 	ibcRouter.AddRoute(ibctransfertypes.ModuleName, transferModule)
 	// this line is used by starport scaffolding # ibc/app/router
+	ibcRouter.AddRoute(dextypes.ModuleName, dexModule)
 	app.IBCKeeper.SetRouter(ibcRouter)
 
 	/****  Module Options ****/
@@ -367,6 +386,7 @@ func New(
 		transferModule,
 		wallet.NewAppModule(appCodec, app.walletKeeper),
 		// this line is used by starport scaffolding # stargate/app/appModule
+		dexModule,
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
@@ -401,6 +421,7 @@ func New(
 		ibctransfertypes.ModuleName,
 		wallettypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/initGenesis
+		dextypes.ModuleName,
 	)
 
 	app.mm.RegisterInvariants(&app.CrisisKeeper)
@@ -583,6 +604,7 @@ func initParamsKeeper(appCodec codec.BinaryMarshaler, legacyAmino *codec.LegacyA
 	paramsKeeper.Subspace(ibctransfertypes.ModuleName)
 	paramsKeeper.Subspace(ibchost.ModuleName)
 	// this line is used by starport scaffolding # stargate/app/paramSubspace
+	paramsKeeper.Subspace(dextypes.ModuleName)
 
 	return paramsKeeper
 }

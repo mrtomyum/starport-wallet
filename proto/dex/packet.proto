@@ -1,0 +1,27 @@
+syntax = "proto3";
+package mrtomyum.wallet.dex;
+
+option go_package = "gitlab.com/mrtomyum/wallet/x/dex/types";
+
+message DexPacketData {
+    oneof packet {
+        NoData noData = 1;
+        // this line is used by starport scaffolding # ibc/packet/proto/field
+				SellOrderPacketData sellOrderPacket = 2; // this line is used by starport scaffolding # ibc/packet/proto/field/number
+    }
+}
+
+message NoData {
+}
+
+// this line is used by starport scaffolding # ibc/packet/proto/message
+// SellOrderPacketData defines a struct for the packet payload
+message SellOrderPacketData {
+	  string amountDenom = 1;
+  int32 amount = 2;
+  int32 price = 3;
+}
+
+// SellOrderPacketAck defines a struct for the packet acknowledgment
+message SellOrderPacketAck {
+	}
